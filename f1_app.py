@@ -97,4 +97,3 @@ with tab2:
 
 # Once user selects a year, the race dropdown will change
 # depending on the races that happened that year
-# Does this add
