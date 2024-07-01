@@ -5,7 +5,7 @@ import fastf1 as ff
 from time import time
 import driver_trace
 import trace_options
-from google.cloud import storage
+
 
 bucket_name = "f1dashboard"
 client = storage.Client()
