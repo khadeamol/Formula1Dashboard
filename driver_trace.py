@@ -5,7 +5,7 @@ import fastf1.plotting
 import pandas as pd
 
 fastf1.plotting.setup_mpl(misc_mpl_mods=False)
-ff.Cache.enable_cache("Cache")
+ff.Cache.enable_cache("cache")
 
 
 def plot_traces(yearSel, raceSel, sessionSel, driver1, lapNumber = None):
