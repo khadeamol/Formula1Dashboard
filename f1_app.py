@@ -12,7 +12,7 @@ client = storage.Client()
 bucket = client.bucket(bucket_name)
 
 def yearList():
-    yearList = os.listdir("Cache")
+    yearList = os.listdir("cache")
     print(yearList.sort())
     return yearList   
 
