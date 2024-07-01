@@ -6,7 +6,7 @@ import pandas as pd
 
 
 fastf1.plotting.setup_mpl(misc_mpl_mods=False)
-ff.Cache.enable_cache("Cache")
+ff.Cache.enable_cache("cache")
 
 
 def fastestLapTrace(yearSel, raceSel, sessionSel, driver1, driver2):
