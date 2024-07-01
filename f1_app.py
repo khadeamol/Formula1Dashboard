@@ -26,7 +26,8 @@ tab1, tab2, tab3 = st.tabs(["Driver Analysis", "Comparison", "Placeholder"])
 
 with st.sidebar:
     with st.form("Sidebar form"):
-        yearSel = st.selectbox("Select Year",yearList())
+        # yearSel = st.selectbox("Select Year",yearList())
+        yearSel = st.text_input("Select Year:")
         raceSel = st.selectbox("Select Event:", eventList)
         sessionSel = st.selectbox("Select Session:",options=["Race","Qualifying","FP1","FP2", "FP3", "Sprint"])
         print("Good work!")
