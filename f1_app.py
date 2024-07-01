@@ -7,10 +7,6 @@ import driver_trace
 import trace_options
 
 
-bucket_name = "f1dashboard"
-client = storage.Client()
-bucket = client.bucket(bucket_name)
-
 def yearList():
     yearList = os.listdir("cache")
     print(yearList.sort())
