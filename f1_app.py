@@ -12,13 +12,12 @@ client = storage.Client()
 bucket = client.bucket(bucket_name)
 
 def yearList():
-    cache = "https://console.cloud.google.com/storage/browser/f1dashboard"
-    yearList = bucket.list_blobs()
-    print(yearList)
-    return yearList
+    yearList = os.listdir("Cache")
+    print(yearList.sort())
+    return yearList   
 
 def raceListGenerator(year):
-    raceList = os.listdir(f"{cache}/{year}")
+    raceList = os.listdir(f"cache/{year}")
     return raceList
 
 schedule = pd.read_parquet("./races_by_year.pq")
