@@ -8,14 +8,18 @@ import pandas as pd
 fastf1.plotting.setup_mpl(misc_mpl_mods=False)
 ff.Cache.enable_cache("cache")
 
+def loadSession(yearSel, raceSel, sessionSel="R"):
+    session = ff.get_session(int(yearSel), raceSel, sessionSel)
+    sessionObj = session.load()
+    return sessionObj
 
-def fastestLapTrace(yearSel, raceSel, sessionSel, driver1, driver2):
+
+
+def fastestLapTrace(sessionObj, driver1, driver2):
     # Load session
-    session = ff.get_session(yearSel, raceSel, sessionSel)
-    session.load()
-    driver1_lap = session.laps.pick_driver(driver1).pick_fastest()
-    driver2_lap = session.laps.pick_driver(driver2).pick_fastest()
     
+    driver1_lap = sessionObj.laps.pick_driver(driver1).pick_fastest()
+    driver2_lap = sessionObj.laps.pick_driver(driver2).pick_fastest()
     driver1_tel = driver1_lap.get_car_data().add_distance()
     driver2_tel = driver2_lap.get_car_data().add_distance()
     
