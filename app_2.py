@@ -39,7 +39,9 @@ tab1, tab2, tab3 = st.tabs(["Driver Analysis", "Comparison", "Placeholder"])
 
 with st.sidebar:
     yearSelect = st.text_input("Enter year")
+    st.session_state['yearSel'] = yearSelect
     raceSelect = st.selectbox(f"Select Race for {yearSelect}:", schedule.EventName.unique())
+    st.session_state['raceSelect'] = raceSelect
     raceSubmit = st.button("Pick race")
     if raceSubmit:
         # yearSelect = st.text_input("Enter year")
@@ -73,6 +75,7 @@ with tab1:
     goButton = st.button("Let's Go!")
     if goButton:
         print("Driver selected:", driverSel)
+        st.write(f"Selected Lap for {driverSel} at {st.session_state.get('yearSel')} {st.session_state.get('raceSelect')}")
         lapTimingDetails = driver_trace.plot_traces(sessionObj, driverSel)
         st.set_option('deprecation.showPyplotGlobalUse', False)
         st.pyplot(lapTimingDetails, use_container_width=True)
@@ -86,7 +89,8 @@ with tab2:
     
     goButton = st.button("Compare Laps.")
     if goButton:
-        print("Driver selected:", driverSel)
+
+        st.write(f"Comparing selected lap {driverSel1} and {driverSel2} at {st.session_state.get('yearSel')} {st.session_state.get('raceSelect')}")
         lapsCompared = trace_options.fastestLapTrace(sessionObj, driverSel1, driverSel2)
         st.set_option('deprecation.showPyplotGlobalUse', False)
         st.pyplot(lapsCompared, use_container_width=True)
