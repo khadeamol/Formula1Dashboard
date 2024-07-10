@@ -7,13 +7,14 @@ import pandas as pd
 fastf1.plotting.setup_mpl(misc_mpl_mods=False)
 ff.Cache.enable_cache("cache")
 
-def plot_traces(session, driver1,lapNumber = None):
-    print("Entered plot trace")
+def plot_traces(session, driver1, yearSel, raceSel, lapNumber = None):
+    session = fastf1.get_session(int(yearSel), raceSel, 'R')
     if lapNumber:
         print("Custom lap")
         driver1_lap = session.laps.pick_driver(driver1).pick_lap(int(lapNumber))
         print(driver1_lap)
     else:
+        session.load()
         driver1_lap = session.laps.pick_driver(driver1).pick_fastest()
         print(driver1_lap)
     

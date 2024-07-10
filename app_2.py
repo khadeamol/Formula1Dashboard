@@ -45,7 +45,7 @@ tab1, tab2, tab3 = st.tabs(["Driver Analysis", "Comparison", "Placeholder"])
 
 with st.sidebar:
     with st.form("New form"):
-        yearSelect = st.selectbox("Enter year", options = schedule.EventYear.unique())
+        yearSelect = st.selectbox("Enter year", options = schedule['EventYear'].sort_values(ascending = False).unique())
         st.session_state['yearSel'] = yearSelect
         st.form_submit_button("Select Year.")
         # st.session_state.clear('sessionObj')
@@ -61,15 +61,17 @@ with st.sidebar:
         submitForm = st.form_submit_button("Let's go!")
 
         if submitForm:
+            st.spinner("Loading...")
             if 'sessionObj' not in st.session_state:
                 st.session_state['sessionObj'] = fastf1SessionLoad.loadSession(int(yearSelect), raceSelect)
-                print("In if")
+                st.write("Race loaded.")
                 sessionObj=st.session_state.get('sessionObj')
                 st.session_state['driverList'] = generateDriverList(sessionObj, yearSelect, raceSelect)        
                 
             else:
                 print("In else")
                 sessionObj = fastf1SessionLoad.loadSession(int(st.session_state['yearSel']), st.session_state['raceSelect'])
+                st.write("Race loaded.")
                 print(generateDriverList(sessionObj, yearSelect, raceSelect))
                 st.session_state['driverList'] = generateDriverList(sessionObj, yearSelect, raceSelect)        
     st.write(driverList)
@@ -79,30 +81,46 @@ with st.sidebar:
 with tab1:
     
     sessionObj = st.session_state.get('sessionObj')
+    
     driverList = st.session_state.get('driverList')
-
-    driverSel = st.selectbox("Enter Driver Initials", options = driverList)
-
+    try:
+        driverSel = st.selectbox("Enter Driver Initials", options = driverList)
+    except:
+        driverSel = st.selectbox("Enter Driver Initials", options = [])
     lapSel = st.text_input("Enter Lap Number. Defaults to fastest lap.", "Fastest Lap.")
     goButton = st.button("Let's Go!")
     if goButton:
         print("Driver selected:", driverSel)
         st.write(f"Selected Lap for {driverSel} at {st.session_state.get('yearSel')} {st.session_state.get('raceSelect')}")
-        lapTimingDetails = driver_trace.plot_traces(sessionObj, driverSel)
+        lapTimingDetails = driver_trace.plot_traces(sessionObj, driverSel, st.session_state.get('yearSel'), st.session_state.get('raceSelect'))
         st.set_option('deprecation.showPyplotGlobalUse', False)
         st.pyplot(lapTimingDetails, use_container_width=True)
 
 
 with tab2:
     sessionObj = st.session_state.get('sessionObj')
-    driverSel1 = st.text_input("Enter Driver 1 Identifier")
-    driverSel2 = st.text_input("Enter Driver 2 Identifier")
-    lapSel = st.text_input("Enter lap to compare. Defaults to fastest lap.")
-    
-    goButton = st.button("Compare Laps.")
-    if goButton:
+    driverList = st.session_state.get('driverList')
 
-        st.write(f"Comparing selected lap {driverSel1} and {driverSel2} at {st.session_state.get('yearSel')} {st.session_state.get('raceSelect')}")
-        lapsCompared = trace_options.fastestLapTrace(sessionObj, driverSel1, driverSel2)
-        st.set_option('deprecation.showPyplotGlobalUse', False)
-        st.pyplot(lapsCompared, use_container_width=True)
+    try:
+        driverSel1 = st.selectbox("Select Driver 1", options = driverList)
+    except:
+        driverSel1 = st.selectbox("Select Driver 1", options = [])
+
+    try:
+        driverSel2 = st.selectbox("Select Driver 2", options = driverList)
+    except:
+        driverSel2 = st.selectbox("Select Driver 2", options = [])
+
+    if driverSel1 == driverSel2:
+        st.write("Please select two different drivers.")
+    else:
+        if 'lapSelect' not in st.session_state:
+            st.session_state['lapSelect'] = st.text_input("Enter lap to compare. Defaults to fastest lap.")
+        
+        goButton = st.button("Compare Laps.")
+        if goButton:
+
+            st.write(f"Comparing selected lap {driverSel1} and {driverSel2} at {st.session_state.get('yearSel')} {st.session_state.get('raceSelect')}")
+            lapsCompared = trace_options.fastestLapTrace(sessionObj, driverSel1, driverSel2, st.session_state.get('lapSelect'))
+            st.set_option('deprecation.showPyplotGlobalUse', False)
+            st.pyplot(lapsCompared, use_container_width=True)
