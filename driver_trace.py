@@ -14,7 +14,6 @@ def plot_traces(session, driver1,lapNumber = None):
         driver1_lap = session.laps.pick_driver(driver1).pick_lap(int(lapNumber))
         print(driver1_lap)
     else:
-        session.load()
         driver1_lap = session.laps.pick_driver(driver1).pick_fastest()
         print(driver1_lap)
     
