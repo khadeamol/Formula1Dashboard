@@ -4,7 +4,7 @@ import fastf1 as ff
 import fastf1.plotting
 import pandas as pd
 import seaborn as sns 
-
+import streamlit as st
 
 
 fastf1.plotting.setup_mpl(misc_mpl_mods=False)
@@ -16,15 +16,17 @@ def plotTraces(session, driver1, yearSel, raceSel, lapNumber = None):
 
     if lapNumber:
         print("Custom lap")
+        session = st.session_state.get("sessionObj")
+        # session.load()
         driver1_lap = session.laps.pick_driver(driver1).pick_lap(int(lapNumber))
         print(driver1_lap)
     else:
-        session.load()
+        session = st.session_state.get("sessionObj")
         driver1_lap = session.laps.pick_driver(driver1).pick_fastest()
         print(driver1_lap)
     
     driver1_tel = driver1_lap.get_car_data().add_distance()
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10, 5))
 
     ax.plot(driver1_tel['Distance'], driver1_tel['Speed'], color = fastf1.plotting.driver_color(driver1), label = driver1)
 
@@ -50,7 +52,7 @@ def plotTraces(session, driver1, yearSel, raceSel, lapNumber = None):
     # ax[2].set_ylabel('Brake')
     # ax[2].set_xlabel('Distance in m')
     
-    plt.suptitle(f"Lap traces")
+    plt.suptitle(f"Speed Trace with Turn annotations")
 
 
 

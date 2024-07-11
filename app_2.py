@@ -35,13 +35,12 @@ def generateRaceList(year):
     return raceList
 
 lapTimingDetails = ""
-resetButton = st.button("Reset")
-if resetButton:
-    st.session_state.clear()
+
+
 raceSel = ""
 sessionSel = ""
 driverList = ""
-tab1, tab2, tab3 = st.tabs(["Driver Analysis", "Comparison", "Test"])
+# tab1, tab2, tab3 = st.tabs(["Driver Analysis", "Comparison", "Test"])
 
 with st.sidebar:
     with st.expander("Select Race to begin analysis."):
@@ -64,7 +63,8 @@ with st.sidebar:
             if submitForm:
 
                 if 'sessionObj' not in st.session_state:
-                    st.session_state['sessionObj'] = fastf1SessionLoad.loadSession(int(yearSelect), raceSelect)
+                    sessionObj = fastf1SessionLoad.loadSession(int(yearSelect), raceSelect)
+                    st.session_state['sessionObj'] = sessionObj
                     st.write("Race loaded.")
                     sessionObj=st.session_state.get('sessionObj')
                     st.session_state['driverList'] = generateDriverList(sessionObj, yearSelect, raceSelect)        
@@ -73,35 +73,42 @@ with st.sidebar:
                     print("In else")
                     sessionObj = fastf1SessionLoad.loadSession(int(st.session_state['yearSel']), st.session_state['raceSelect'])
                     st.write("Race loaded.")
+                    st.session_state['sessionObj'] = sessionObj
                     print(generateDriverList(sessionObj, yearSelect, raceSelect))
                     st.session_state['driverList'] = generateDriverList(sessionObj, yearSelect, raceSelect)        
         st.write(driverList)
 
+    with st.expander("Single Driver Analysis"):
+        driverList = st.session_state.get("driverList")
+        # if 'driverSel' not in st.session_state:
+        try:
+            driverSel = st.selectbox("Pick Driver", options = driverList)
+            st.session_state['driverSel'] = driverSel
+            maxLaps = int(max((st.session_state.get('sessionObj')).laps.pick_driver(driverSel)['LapNumber']))
+            st.write(f"{driverSel} completed {maxLaps} laps at this race.")
+            with st.form("Lap Selection:"):
+                lapSelect = st.text_input("Enter Lap Number to analyze, or hit Pick Fastest", "")
+                st.session_state["lapSelect"] = lapSelect
+                customLap = st.form_submit_button("Build Visualization")
+            # st.session['fastestLap'] = st.button("Pick Fastest Lap")
+            print("outside custom lap")
+            if customLap:
+                print("inside custom lap")
+                sessionObj = st.session_state.get("sessionObj")
+                print(f"Working on lap {st.session_state.get('lapSelect')}")
+                lapTimingDetails = driver_trace.plotTraces(sessionObj, driverSel, st.session_state.get('yearSel'), st.session_state.get('raceSelect'), st.session_state.get('lapSelect'))
+                st.session_state['lapTimingDetails'] = lapTimingDetails
+                print("Did it get here")
+
+            else:
+                st.write("Do something")
+        except:
+            st.write("Waiting for user input.")
 
 
-with tab1:
-    
-    sessionObj = st.session_state.get('sessionObj')
-    
-    driverList = st.session_state.get('driverList')
-    try:
-        driverSel = st.selectbox("Enter Driver Initials", options = driverList)
-    except:
-        driverSel = st.selectbox("Enter Driver Initials", options = [])
-    lapSel = st.text_input("Enter Lap Number. Defaults to fastest lap.", "Fastest Lap.")
-    goButton = st.button("Let's Go!")
-    if goButton:
-        print("Driver selected:", driverSel)
-        st.write(f"Selected Lap for {driverSel} at {st.session_state.get('yearSel')} {st.session_state.get('raceSelect')}")
-        lapTimingDetails = driver_trace.plotTraces(sessionObj, driverSel, st.session_state.get('yearSel'), st.session_state.get('raceSelect'))
-        st.set_option('deprecation.showPyplotGlobalUse', False)
-        st.pyplot(lapTimingDetails, use_container_width=True)
-
-
-with tab2:
-    sessionObj = st.session_state.get('sessionObj')
-    driverList = st.session_state.get('driverList')
-    with st.sidebar:   
+    with st.expander("Driver Comparison"):
+        sessionObj = st.session_state.get('sessionObj')
+        driverList = st.session_state.get('driverList')
         try:
             driverSel1 = st.selectbox("Select Driver 1", options = driverList)
         except:
@@ -112,32 +119,80 @@ with tab2:
         except:
             driverSel2 = st.selectbox("Select Driver 2", options = [])
 
-    if driverSel1 == driverSel2:
-        st.write("Please select two different drivers.")
-    else:
-        if 'lapSelect' not in st.session_state:
-            st.session_state['lapSelect'] = st.text_input("Enter lap to compare. Defaults to fastest lap.")
+        resetButton = st.button("Reset")
+        if resetButton:
+            st.session_state.clear()
+
+if 'lapTimingDetails' in st.session_state:
+    st.set_option('deprecation.showPyplotGlobalUse', False)
+    st.pyplot(lapTimingDetails, use_container_width=True)
+
+
+
+
+# try:
+#     if vizButton:
+#         sessionObj = st.session_state.get("sessionObj")
+#         print(f"Working on lap {st.session_state.get('lapSelect')}")
+#         lapTimingDetails = driver_trace.plotTraces(sessionObj, driverSel, st.session_state.get('yearSel'), st.session_state.get('raceSelect'), st.session_state.get('lapSelect'))
+#         st.set_option('deprecation.showPyplotGlobalUse', False)
+#         print("Did it get here")
+#         st.pyplot(lapTimingDetails, use_container_width=True)
+# except:
+#         st.write("")
+
+# try:
+#     if fastestLap:
+#         sessionObj = st.session_state.get("sessionObj")
+#         lapTimingDetails = driver_trace.plotTraces(sessionObj, driverSel, st.session_state.get('yearSel'), st.session_state.get('raceSelect'))
+#         st.set_option('deprecation.showPyplotGlobalUse', False)
+#         print("Did it get here")
+#         st.pyplot(lapTimingDetails, use_container_width=True)
+# except:
+#         st.write("")
+
+
+
+# with tab1:
+#     lapSel = st.text_input("Enter Lap Number. Defaults to fastest lap.", "Fastest Lap.")
+#     goButton = st.button("Let's Go!")
+#     if goButton:
+#         print("Driver selected:", driverSel)
+#         st.write(f"Selected Lap for {driverSel} at {st.session_state.get('yearSel')} {st.session_state.get('raceSelect')}")
+#         lapTimingDetails = driver_trace.plotTraces(sessionObj, driverSel, st.session_state.get('yearSel'), st.session_state.get('raceSelect'))
+#         st.set_option('deprecation.showPyplotGlobalUse', False)
+#         st.pyplot(lapTimingDetails, use_container_width=True)
+
+
+# with tab2:
+
+
+#     if driverSel1 == driverSel2:
+#         st.write("Please select two different drivers.")
+#     else:
+#         if 'lapSelect' not in st.session_state:
+#             st.session_state['lapSelect'] = st.text_input("Enter lap to compare. Defaults to fastest lap.")
         
-        goButton = st.button("Compare Laps.")
-        if goButton:
+#         goButton = st.button("Compare Laps.")
+#         if goButton:
 
-            st.write(f"Comparing selected lap {driverSel1} and {driverSel2} at {st.session_state.get('yearSel')} {st.session_state.get('raceSelect')}")
-            lapsCompared = trace_options.fastestLapTrace(sessionObj, driverSel1, driverSel2, st.session_state.get('lapSelect'))
-            st.set_option('deprecation.showPyplotGlobalUse', False)
-            st.pyplot(lapsCompared, use_container_width=True)
+#             st.write(f"Comparing selected lap {driverSel1} and {driverSel2} at {st.session_state.get('yearSel')} {st.session_state.get('raceSelect')}")
+#             lapsCompared = trace_options.fastestLapTrace(sessionObj, driverSel1, driverSel2, st.session_state.get('lapSelect'))
+#             st.set_option('deprecation.showPyplotGlobalUse', False)
+#             st.pyplot(lapsCompared, use_container_width=True)
 
 
-with tab3:
-    with st.expander("New"):
-        with st.form("Test form"):
-            expnd = st.text_input("Write here")
-            btn = st.form_submit_button("Go")
-            if btn:
-                st.write(expnd)
+# with tab3:
+#     with st.expander("New"):
+#         with st.form("Test form"):
+#             expnd = st.text_input("Write here")
+#             btn = st.form_submit_button("Go")
+#             if btn:
+#                 st.write(expnd)
 
-    featureSelect = st.selectbox("Choose option", options = ['Lap Trace', 'Lap Time Scatterplot'])
+#     featureSelect = st.selectbox("Choose option", options = ['Lap Trace', 'Lap Time Scatterplot'])
 
-    if featureSelect == 'Lap Trace':
-        st.write("First option")
-    elif featureSelect == 'Lap Time Scatterplot':
-        st.write("Second option")
+#     if featureSelect == 'Lap Trace':
+#         st.write("First option")
+#     elif featureSelect == 'Lap Time Scatterplot':
+#         st.write("Second option")
