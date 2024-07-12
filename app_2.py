@@ -36,11 +36,13 @@ def generateRaceList(year):
 
 lapTimingDetails = ""
 
-
-raceSel = ""
-sessionSel = ""
-driverList = ""
-# tab1, tab2, tab3 = st.tabs(["Driver Analysis", "Comparison", "Test"])
+if 'responsePacket' not in st.session_state:
+    responsePacket = {}
+    responsePacket['maxSpeed'] = ""
+    responsePacket['tyreCompound'] = ""
+    responsePacket['gridPosition'] = ""
+    responsePacket['lapNumber'] = "int(driver1_lap['LapNumber'].item())"
+    st.session_state['responsePacket'] = responsePacket
 
 with st.sidebar:
     with st.expander("Select Race to begin analysis."):
@@ -61,7 +63,7 @@ with st.sidebar:
             submitForm = st.form_submit_button("Let's go!")
 
             if submitForm:
-
+                
                 if 'sessionObj' not in st.session_state:
                     sessionObj = fastf1SessionLoad.loadSession(int(yearSelect), raceSelect)
                     st.session_state['sessionObj'] = sessionObj
@@ -76,9 +78,9 @@ with st.sidebar:
                     st.session_state['sessionObj'] = sessionObj
                     print(generateDriverList(sessionObj, yearSelect, raceSelect))
                     st.session_state['driverList'] = generateDriverList(sessionObj, yearSelect, raceSelect)        
-        st.write(driverList)
+        # st.write(driverList)
 
-    with st.expander("Single Driver Analysis"):
+    with st.expander("Driver Analysis"):
         driverList = st.session_state.get("driverList")
         # if 'driverSel' not in st.session_state:
         try:
@@ -89,19 +91,20 @@ with st.sidebar:
             with st.form("Lap Selection:"):
                 lapSelect = st.text_input("Enter Lap Number to analyze, or hit Pick Fastest", "")
                 st.session_state["lapSelect"] = lapSelect
-                customLap = st.form_submit_button("Build Visualization")
-            # st.session['fastestLap'] = st.button("Pick Fastest Lap")
-            print("outside custom lap")
-            if customLap:
-                print("inside custom lap")
-                sessionObj = st.session_state.get("sessionObj")
-                print(f"Working on lap {st.session_state.get('lapSelect')}")
-                lapTimingDetails = driver_trace.plotTraces(sessionObj, driverSel, st.session_state.get('yearSel'), st.session_state.get('raceSelect'), st.session_state.get('lapSelect'))
-                st.session_state['lapTimingDetails'] = lapTimingDetails
-                print("Did it get here")
+                buildViz = st.form_submit_button("Build Visualization")
+            if buildViz:
+                if lapSelect != "":
+                    sessionObj = st.session_state.get("sessionObj")
+                    st.write(f"{st.session_state.get('lapSelect')}")
+                    
+                    st.session_state['responsePacket'] = {}
+                    st.session_state['responsePacket'] = driver_trace.plotTraces(sessionObj, driverSel, st.session_state.get('yearSel'), st.session_state.get('raceSelect'), st.session_state.get('lapSelect'))
 
-            else:
-                st.write("Do something")
+                elif lapSelect == "":
+                    sessionObj = st.session_state.get("sessionObj")
+                    print(f"{driverSel}'s Fastest Lap.")
+                    responsePacket = driver_trace.plotTraces(sessionObj, driverSel, st.session_state.get('yearSel'), st.session_state.get('raceSelect'))
+                    st.session_state['lapTimingDetails'] = lapTimingDetails
         except:
             st.write("Waiting for user input.")
 
@@ -122,12 +125,32 @@ with st.sidebar:
         resetButton = st.button("Reset")
         if resetButton:
             st.session_state.clear()
-
-if 'lapTimingDetails' in st.session_state:
-    st.set_option('deprecation.showPyplotGlobalUse', False)
-    st.pyplot(lapTimingDetails, use_container_width=True)
-
-
+try:
+    responsePacket = st.session_state.get('responsePacket')
+    print("break after")
+    # for i in st.session_state.items():
+    #     st.write(i)
+    if 'responsePacket' in st.session_state:
+        st.set_option('deprecation.showPyplotGlobalUse', False)
+        st.pyplot(responsePacket['plotShow'], use_container_width=True)
+        st.write(f"Lap Number: {responsePacket['lapNumber']}")
+        st.write(f"Maximum Speed: {responsePacket['maxSpeed']}")
+        st.write(f"Tyre Compound: {responsePacket['tyreCompound']}")
+        st.write(f"Grid Position: {responsePacket['gridPosition']}")
+        print("Does it break ere")
+        scatterplot = st.button("Scatterplot")
+        if scatterplot:
+            print("entered scatterplot if case")
+            scatterplot = driver_trace.scatterPlot(responsePacket['sessionObj'],driverSel=st.session_state.get('driverSel'))
+            print("Came back with plot")
+            st.set_option('deprecation.showPyplotGlobalUse', False)
+            st.pyplot(scatterplot, use_container_width=True)
+        else:
+            print("bop bop")
+    else:
+        st.write("Waiting for user")
+except:
+    st.write("Waiting...")
 
 
 # try:
@@ -193,6 +216,6 @@ if 'lapTimingDetails' in st.session_state:
 #     featureSelect = st.selectbox("Choose option", options = ['Lap Trace', 'Lap Time Scatterplot'])
 
 #     if featureSelect == 'Lap Trace':
-#         st.write("First option")
 #     elif featureSelect == 'Lap Time Scatterplot':
+#         st.write("First option")
 #         st.write("Second option")

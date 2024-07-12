@@ -13,19 +13,25 @@ ff.Cache.enable_cache("cache")
 
 def plotTraces(session, driver1, yearSel, raceSel, lapNumber = None):
     session = fastf1.get_session(int(yearSel), raceSel, 'R')
-
+    responsePacket = {}
     if lapNumber:
         print("Custom lap")
         session = st.session_state.get("sessionObj")
-        # session.load()
+        print(session)
         driver1_lap = session.laps.pick_driver(driver1).pick_lap(int(lapNumber))
-        print(driver1_lap)
+
     else:
+        print("Fastest Lap")
         session = st.session_state.get("sessionObj")
         driver1_lap = session.laps.pick_driver(driver1).pick_fastest()
-        print(driver1_lap)
+        
     
     driver1_tel = driver1_lap.get_car_data().add_distance()
+    print(f"{driver1_lap} driver's lap")
+    responsePacket['maxSpeed'] = driver1_tel.Speed.max()
+    responsePacket['tyreCompound'] = driver1_lap['Compound'].item()
+    responsePacket['gridPosition'] = int(driver1_lap['Position'].item())
+    responsePacket['lapNumber'] = int(driver1_lap['LapNumber'].item())
     fig, ax = plt.subplots(figsize=(10, 5))
 
     ax.plot(driver1_tel['Distance'], driver1_tel['Speed'], color = fastf1.plotting.driver_color(driver1), label = driver1)
@@ -53,16 +59,15 @@ def plotTraces(session, driver1, yearSel, raceSel, lapNumber = None):
     # ax[2].set_xlabel('Distance in m')
     
     plt.suptitle(f"Speed Trace with Turn annotations")
+    print("Plot built")
+    responsePacket['plotShow'] = plt.show()
+    return responsePacket
 
 
-
-    return plt.show()
-
-
-def scatterPlot(session, yearSel, raceSel, driverSel):
-    session = fastf1.get_session(int(yearSel), raceSel, 'R')
+def scatterPlot(session,driverSel):
+    session.load()
     driverLaps = session.laps.pick_driver(driverSel).pick_quicklaps().reset_index()
-
+    print(f"driverLaps{driverLaps}")
     fig, ax = plt.subplots(figsize = (8,8))
 
     sns.scatterplot(data= driverLaps,
@@ -77,7 +82,7 @@ def scatterPlot(session, yearSel, raceSel, driverSel):
     ax.set_xlabel("Lap Number")
     ax.set_ylabel("Lap Time")
     ax.invert_yaxis()
-    plt.suptitle(f"{driverSel} Lap times in the {yearSel} {raceSel}")
+    print("Generated scatterplot")
 
 
     return plt.show()
