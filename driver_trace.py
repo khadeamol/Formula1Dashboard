@@ -13,6 +13,8 @@ ff.Cache.enable_cache("cache")
 
 def plotTraces(session, driver1, yearSel, raceSel, lapNumber = None):
     session = fastf1.get_session(int(yearSel), raceSel, 'R')
+    session = st.session_state.get('sessionObj')
+    print("Session object loaded")
     responsePacket = {}
     if lapNumber:
         print("Custom lap")
@@ -67,6 +69,7 @@ def plotTraces(session, driver1, yearSel, raceSel, lapNumber = None):
     plt.suptitle(f"Speed Trace with Turn annotations")
     print("Plot built")
     responsePacket['plotShow'] = plt.show()
+    st.session_state['timeTrace'] = responsePacket['plotShow'] 
     return responsePacket
 
 
@@ -99,4 +102,6 @@ def scatterPlot(driverSel):
     responsePacket['fastestLap'] = fastestLap
     responsePacket['averageSpeed'] = round(averageSpeed,3)
     st.session_state['responsePacket'] = responsePacket
+
+    st.session_state['scatterPlot'] = responsePacket['plotShow'] 
     return responsePacket

@@ -36,7 +36,7 @@ def generateRaceList(year):
 
 lapTimingDetails = ""
 
-tab1, tab2, tab3 = st.tabs(["Driver Analysis", "Comparison", "Placeholder"])
+tab1, tab2= st.tabs(["Driver Analysis", "Comparison"])
 
 if 'responsePacket' not in st.session_state:
     responsePacket = {}
@@ -80,6 +80,7 @@ with st.sidebar:
                     st.session_state['sessionObj'] = sessionObj
                     print(generateDriverList(sessionObj, yearSelect, raceSelect))
                     st.session_state['driverList'] = generateDriverList(sessionObj, yearSelect, raceSelect)        
+        placeholder = st.button("Placeholder")
         # st.write(driverList)
 with tab1:
         driverList = st.session_state.get("driverList")
@@ -99,7 +100,6 @@ with tab1:
                 scatterplot = st.button("Lap Times Distribution")
                 st.session_state['driverSel'] = driverSel
 
-
             with col2:
                 fastestLap = st.button("Speed Trace for Fastest Lap")
                 st.session_state["lapSelect"] = lapSelect
@@ -107,9 +107,8 @@ with tab1:
             with col3:
                 buildViz = st.button("Custom Lap")
             
-            if scatterplot:
-                scatterplot = driver_trace.scatterPlot(driverSel=st.session_state.get('driverSel'))
-                st.session_state['scatterplot'] = scatterplot
+            scatterplot = driver_trace.scatterPlot(driverSel=st.session_state.get('driverSel'))
+            st.session_state['scatterplot'] = scatterplot
             
             
             if fastestLap:
@@ -169,6 +168,26 @@ try:
 except:
     st.write("Waiting...")
 
+# with tab3:
+#     st.write("pfff")
+
+# with tab3:
+#     if placeholder:  
+#         with st.sidebar():
+#             driverList = st.session_state.get("driverList")
+#             driverSel = st.selectbox("Pick Driver here", options = driverList)
+#         st.session_state['driverSel'] = driverSel
+#         scatterplot = driver_trace.scatterPlot(driverSel=st.session_state.get('driverSel'))
+#         st.session_state['scatterplot'] = scatterplot
+#         st.pyplot(responsePacket['plotShow'], use_container_width=True)
+#         sessionObj = st.session_state.get("sessionObj")
+#         print(f"{driverSel}'s Fastest Lap.")
+#         responsePacket = driver_trace.plotTraces(sessionObj, driverSel, st.session_state.get('yearSel'), st.session_state.get('raceSelect'))
+#         st.session_state['responsePacket'] = responsePacket
+#         print(responsePacket)
+#         st.pyplot(responsePacket['plotShow'], use_container_width=True)
+#     else:
+#         st.write("No")
 
 # try:
 #     if vizButton:
@@ -211,7 +230,7 @@ except:
 #         st.write("Please select two different drivers.")
 #     else:
 #         if 'lapSelect' not in st.session_state:
-#             st.session_state['lapSelect'] = st.text_input("Enter lap to compare. Defaults to fastest lap.")
+#             st.session_state['d'] = st.text_input("Enter lap to compare. Defaults to fastest lap.")
         
 #         goButton = st.button("Compare Laps.")
 #         if goButton:
