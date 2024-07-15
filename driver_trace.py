@@ -15,6 +15,7 @@ def plotTraces(session, driver1, yearSel, raceSel, lapNumber = None):
     session = fastf1.get_session(int(yearSel), raceSel, 'R')
     session = st.session_state.get('sessionObj')
     print("Session object loaded")
+
     responsePacket = {}
     if lapNumber:
         print("Custom lap")
@@ -68,9 +69,12 @@ def plotTraces(session, driver1, yearSel, raceSel, lapNumber = None):
     
     plt.suptitle(f"Speed Trace with Turn annotations")
     print("Plot built")
-    responsePacket['plotShow'] = plt.show()
-    st.session_state['timeTrace'] = responsePacket['plotShow'] 
-    return responsePacket
+
+    responseObj = {}
+    responseObj['packet'] = responsePacket
+    responseObj['plot'] = plt
+    st.session_state['responseObj'] = responseObj
+    return responseObj
 
 
 def scatterPlot(driverSel):
@@ -80,7 +84,6 @@ def scatterPlot(driverSel):
     driverLaps = driverLaps[driverLaps['TrackStatus']=='1']
 
     averageSpeed = driverLaps.pick_quicklaps().get_car_data().add_distance().Speed.values.mean()
-    print(f"driverLaps{driverLaps}")
 
     fig, ax = plt.subplots(figsize=(10, 5))
     sns.scatterplot(data= driverLaps,
@@ -95,13 +98,14 @@ def scatterPlot(driverSel):
     ax.set_ylabel("Lap Time")
     ax.invert_yaxis()
     responsePacket = {}
-    
     responsePacket['chartType'] = "scatterplot"
-    responsePacket['plotShow'] = plt.show()
     fastestLap = str(driverLaps.LapTime.min())[-12:-3]
     responsePacket['fastestLap'] = fastestLap
     responsePacket['averageSpeed'] = round(averageSpeed,3)
     st.session_state['responsePacket'] = responsePacket
 
-    st.session_state['scatterPlot'] = responsePacket['plotShow'] 
-    return responsePacket
+    # st.session_state['scatterPlot'] = responsePacket['plotShow'] 
+    responseObj = {}
+    responseObj['packet'] = responsePacket
+    responseObj['plot'] = plt
+    return responseObj

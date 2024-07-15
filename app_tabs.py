@@ -7,6 +7,9 @@ import driver_trace
 import trace_options
 import fastf1SessionLoad
 
+import mpld3
+import streamlit.components.v1 as components
+
 def yearList():
     yearList = os.listdir("cache")
     print(yearList.sort())
@@ -114,18 +117,17 @@ with tab1:
             if fastestLap:
                 sessionObj = st.session_state.get("sessionObj")
                 print(f"{driverSel}'s Fastest Lap.")
-                st.session_state['responsePacket'] = driver_trace.plotTraces(sessionObj, driverSel, st.session_state.get('yearSel'), st.session_state.get('raceSelect'))
+                st.session_state['responseObj'] = driver_trace.plotTraces(sessionObj, driverSel, st.session_state.get('yearSel'), st.session_state.get('raceSelect'))
             
             # totalLaps = int(max((st.session_state.get('sessionObj')).laps.pick_driver(driverSel)['LapNumber']))
             # st.write(f"{driverSel} completed {totalLaps} laps at this race.")
             
             if buildViz:
                 sessionObj = st.session_state.get("sessionObj")
-                st.session_state['responsePacket'] = driver_trace.plotTraces(sessionObj, driverSel, st.session_state.get('yearSel'), st.session_state.get('raceSelect'), st.session_state.get('lapSelect'))
+                st.session_state['responseObj'] = driver_trace.plotTraces(sessionObj, driverSel, st.session_state.get('yearSel'), st.session_state.get('raceSelect'), st.session_state.get('lapSelect'))
 
         except Exception as e:
-            st.write("Select race from the sidebar.")
-            print(e.args)
+            st.write("Pick race")
             
 
 
@@ -146,26 +148,34 @@ with tab1:
     #     if resetButton:
     #         st.session_state.clear()
 try:
-    responsePacket = st.session_state.get('responsePacket')
+    responseObj = st.session_state.get('responseObj')
+    print("Got response object")
     st.set_option('deprecation.showPyplotGlobalUse', False)
-    
+    responsePacket = responseObj['packet']
+    print(responsePacket)
+    try:
+        lapMetrics = pd.DataFrame.from_dict([responsePacket])
+        st.session_state['lapMetrics'] = lapMetrics
+        print("printed dataframe")
+    except Exception as e:
+        print("Didn't work")
+        print(e)
     if responsePacket['chartType'] == "timeTrace":  
-
-            st.pyplot(responsePacket['plotShow'], use_container_width=True)
-            st.write(f"Driver: {st.session_state.get('driverSel')}")
-            st.write(f"Lap Time: {responsePacket['lapTime']}")
-            st.write(f"Lap Number: {responsePacket['lapNumber']}")
-            st.write(f"Maximum Speed: {responsePacket['maxSpeed']}")
-            st.write(f"Average Speed: {responsePacket['averageSpeed']} kmph")
-            st.write(f"Tyre Compound: {responsePacket['tyreCompound']}")
-            st.write(f"Grid Position: {responsePacket['gridPosition']}")
-
-    elif responsePacket['chartType'] == 'scatterplot':        
-        st.pyplot(responsePacket['plotShow'], use_container_width=True)
-        st.write(f"Average Speed: {responsePacket['averageSpeed']} kmph")
-        st.write(f"Fastest Lap: {responsePacket['fastestLap']}")
-
+            try:
+                print("try to read return")
+                st.pyplot((responseObj['plot']).show(), use_container_width=True)
+                print("printed scatterplot")
+            except Exception as e:
+                print("try to read return success")
+                print(e)
+            st.dataframe(lapMetrics)
+            print("Done with tis")
+    
+    else:
+        print("entered here")   
+        st.pyplot((responseObj['plot']).show(), use_container_width=True)
 except:
+    print("complete fail")
     st.write("Waiting...")
 
 # with tab3:
