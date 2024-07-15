@@ -72,9 +72,13 @@ with st.sidebar:
                 if 'sessionObj' not in st.session_state:
                     sessionObj = fastf1SessionLoad.loadSession(int(yearSelect), raceSelect)
                     st.session_state['sessionObj'] = sessionObj
-                    st.write("Race loaded.")
                     sessionObj=st.session_state.get('sessionObj')
-                    st.session_state['driverList'] = generateDriverList(sessionObj, yearSelect, raceSelect)        
+                    st.session_state['driverList'] = generateDriverList(sessionObj, yearSelect, raceSelect)
+                    driverSel = sessionObj.results.Abbreviation[0]
+                    st.session_state['driverSel'] = driverSel
+                    scatterplot = driver_trace.scatterPlot(driverSel=st.session_state.get('driverSel'))
+                    st.session_state['scatterplot'] = scatterplot
+                    st.pyplot(scatterplot['plot'])
                     
                 else:
                     print("In else")
@@ -82,11 +86,15 @@ with st.sidebar:
                     st.write("Race loaded.")
                     st.session_state['sessionObj'] = sessionObj
                     print(generateDriverList(sessionObj, yearSelect, raceSelect))
-                    st.session_state['driverList'] = generateDriverList(sessionObj, yearSelect, raceSelect)        
+                    st.session_state['driverList'] = generateDriverList(sessionObj, yearSelect, raceSelect)
+                    driverSel = sessionObj.results.Abbreviation
+                    st.session_state['driverSel'] = driverSel
+                    print("Who won",driverSel[:1])
         placeholder = st.button("Placeholder")
         # st.write(driverList)
 with tab1:
         driverList = st.session_state.get("driverList")
+        driverSel = st.session_state.get("driverSel")
         # if 'driverSel' not in st.session_state:
         try:
             with st.container():
@@ -110,25 +118,52 @@ with tab1:
             with col3:
                 buildViz = st.button("Custom Lap")
             
-            scatterplot = driver_trace.scatterPlot(driverSel=st.session_state.get('driverSel'))
-            st.session_state['scatterplot'] = scatterplot
-            
+
             
             if fastestLap:
                 sessionObj = st.session_state.get("sessionObj")
                 print(f"{driverSel}'s Fastest Lap.")
                 st.session_state['responseObj'] = driver_trace.plotTraces(sessionObj, driverSel, st.session_state.get('yearSel'), st.session_state.get('raceSelect'))
             
-            # totalLaps = int(max((st.session_state.get('sessionObj')).laps.pick_driver(driverSel)['LapNumber']))
-            # st.write(f"{driverSel} completed {totalLaps} laps at this race.")
-            
             if buildViz:
                 sessionObj = st.session_state.get("sessionObj")
                 st.session_state['responseObj'] = driver_trace.plotTraces(sessionObj, driverSel, st.session_state.get('yearSel'), st.session_state.get('raceSelect'), st.session_state.get('lapSelect'))
 
+            if scatterplot:
+                scatterplot = driver_trace.scatterPlot(driverSel=st.session_state.get('driverSel'))
+                st.session_state['scatterplot'] = scatterplot
+            
         except Exception as e:
             st.write("Pick race")
+        try:
+            print("Got response object")
+            st.set_option('deprecation.showPyplotGlobalUse', False)
+
+            responseObj = st.session_state.get('responseObj')
+            print("failing here?")
+            responsePacket = responseObj['packet']
+            lapMetrics = pd.DataFrame.from_dict([responsePacket])
+            st.session_state['lapMetrics'] = lapMetrics
+            print("printed dataframe")
+            if responsePacket['chartType'] == "timeTrace":  
+                    try:
+                        print("try to read return")
+                        st.pyplot((responseObj['plot']).show(), use_container_width=True)
+                        print("printed scatterplot")
+                    except Exception as e:
+                        print("try to read return success")
+                        print(e)
+                    st.dataframe(lapMetrics)
+                    print("Done with tis")
             
+            else:
+                print("entered here")   
+                st.pyplot((responseObj['plot']).show(), use_container_width=True)
+        except Exception as e:
+            print("complete fail")
+            print(e)
+            st.write("Waiting...")
+                    
 
 
     # with st.expander("Driver Comparison"):
@@ -147,36 +182,7 @@ with tab1:
     #     resetButton = st.button("Reset")
     #     if resetButton:
     #         st.session_state.clear()
-try:
-    responseObj = st.session_state.get('responseObj')
-    print("Got response object")
-    st.set_option('deprecation.showPyplotGlobalUse', False)
-    responsePacket = responseObj['packet']
-    print(responsePacket)
-    try:
-        lapMetrics = pd.DataFrame.from_dict([responsePacket])
-        st.session_state['lapMetrics'] = lapMetrics
-        print("printed dataframe")
-    except Exception as e:
-        print("Didn't work")
-        print(e)
-    if responsePacket['chartType'] == "timeTrace":  
-            try:
-                print("try to read return")
-                st.pyplot((responseObj['plot']).show(), use_container_width=True)
-                print("printed scatterplot")
-            except Exception as e:
-                print("try to read return success")
-                print(e)
-            st.dataframe(lapMetrics)
-            print("Done with tis")
-    
-    else:
-        print("entered here")   
-        st.pyplot((responseObj['plot']).show(), use_container_width=True)
-except:
-    print("complete fail")
-    st.write("Waiting...")
+
 
 # with tab3:
 #     st.write("pfff")
