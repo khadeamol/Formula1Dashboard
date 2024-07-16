@@ -47,7 +47,7 @@ def plotTraces(session, driver1, yearSel, raceSel, lapNumber = None):
     responsePacket['lapNumber'] = int(driver1_lap['LapNumber'].item())
     responsePacket['chartType'] = "timeTrace"
     st.session_state['responsePacket'] = responsePacket
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig, ax = plt.subplots(figsize=(7,4))
 
     ax.plot(driver1_tel['Distance'], driver1_tel['Speed'], color = fastf1.plotting.driver_color(driver1), label = driver1)
 
@@ -85,7 +85,7 @@ def scatterPlot(driverSel):
 
     averageSpeed = driverLaps.pick_quicklaps().get_car_data().add_distance().Speed.values.mean()
 
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig, ax = plt.subplots(figsize=(7, 4))
     sns.scatterplot(data= driverLaps,
                     x = "LapNumber",
                     y = "LapTime",
