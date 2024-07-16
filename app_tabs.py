@@ -9,7 +9,6 @@ import fastf1SessionLoad
 
 import mpld3
 import streamlit.components.v1 as components
-from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, ColumnsAutoSizeMode
 
 
 def yearList():
