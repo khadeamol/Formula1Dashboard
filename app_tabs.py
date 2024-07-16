@@ -9,6 +9,8 @@ import fastf1SessionLoad
 
 import mpld3
 import streamlit.components.v1 as components
+from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, ColumnsAutoSizeMode
+
 
 def yearList():
     yearList = os.listdir("cache")
@@ -19,7 +21,12 @@ schedule = pd.read_parquet("./races_by_year.pq")
 
 def generateRaceList(year):
     df = schedule
-    raceList = df[df['EventYear']==year]['EventName']
+    raceList = pd.DataFrame(df[df['EventYear']==year]['EventName'])
+    # df[df["team"].str.contains("Team 1") == False]
+    print("Printing racelist ")
+    
+    raceList = raceList[raceList['EventName'].str.contains("Pre") == False]
+    print(raceList)
     return raceList
 
 lapTimingDetails = ""
@@ -38,20 +45,25 @@ with st.sidebar:
     with st.expander("Select Race to begin analysis."):
         with st.form("New form"):
             yearSelect = st.selectbox("Enter year", options = ['2024', '2023', '2022', '2021', '2020', '2019'])
-            st.session_state['yearSel'] = yearSelect
             st.form_submit_button("Select Year.")
+            st.session_state['yearSel'] = yearSelect
+
         
         if yearSelect:
             raceList = generateRaceList(yearSelect)    
             st.session_state['raceList'] = raceList
-        
+            raceSelect = st.radio(label = "Pick Race", options=raceList)
+            if raceSelect:
+                print(f"Race picked {raceSelect}")
+            submitRaceSelect = st.button("Let's Go.")
+
         with st.form("New form 2"):
-            raceSelect = st.selectbox(f"Select Race for {yearSelect}:", raceList)
-            st.session_state['raceSelect'] = raceSelect
-            submitForm = st.form_submit_button("Let's go!")
+            # raceSelect = st.selectbox(f"Select Race for {yearSelect}:", raceList)
+            # st.session_state['raceSelect'] = raceSelect
+            # submitForm = st.form_submit_button("Let's go!")
         
-            if submitForm:
-                
+            if submitRaceSelect:
+                st.session_state['raceSelect'] = raceSelect
                 if 'sessionObj' not in st.session_state:
                     sessionObj = fastf1SessionLoad.loadSession(int(yearSelect), raceSelect)
                     st.session_state['sessionObj'] = sessionObj
@@ -62,7 +74,6 @@ with st.sidebar:
                     st.session_state['driverWinner'] = driverWinner
                     scatterplot = driver_trace.scatterPlot(driverSel=st.session_state.get('driverWinner'))
                     st.session_state['scatterplot'] = scatterplot
-
                     
                 else:
                     print("In else")
@@ -80,6 +91,7 @@ with tab2:
         driverList = st.session_state.get("driverList")
         driverSel = st.session_state.get("driverSel")
         scatterplot = st.session_state.get('scatterplot')
+
         try:
             with st.container():
                 coln1, coln2 = st.columns(2)
@@ -105,6 +117,7 @@ with tab2:
             
             with col3:
                 buildViz = st.button("Custom Lap")
+
                 print("Col 3")
             if driverSel:
                 sessionObj = st.session_state.get("sessionObj")
@@ -112,6 +125,8 @@ with tab2:
                 # st.session_state['responseObj'] = driver_trace.plotTraces(driverSel)
                 scatterplot = driver_trace.scatterPlot(driverSel=st.session_state.get('driverSel'))
                 print(st.session_state.get('responseObj'))
+
+            
 
                 if fastestLap:
                     sessionObj = st.session_state.get("sessionObj")
@@ -157,12 +172,13 @@ with tab2:
 
 with tab1:
     try:
-        if submitForm:   
-            tab1c1, tab1c2, tab1c3 = st.columns(3)
+        if submitRaceSelect:   
+            
             sessionObj = st.session_state.get('sessionObj')
             resultsDF = sessionObj.results
             raceWinner = sessionObj.results.FullName[0]
             st.header(f"    {yearSelect} {raceSelect}", divider="red")
+            tab1c1, tab1c2, tab1c3 = st.columns(3)
             with tab1c2:
                 st.image(sessionObj.results.HeadshotUrl[0])
                 st.subheader(raceWinner)
