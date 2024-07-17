@@ -42,6 +42,7 @@ if 'responsePacket' not in st.session_state:
 
 with st.sidebar:
     with st.expander("Select Race to begin analysis."):
+        startTime = time()
         with st.form("New form"):
             yearSelect = st.selectbox("Enter year", options = ['2024', '2023', '2022', '2021', '2020', '2019'])
             st.form_submit_button("Select Year.")
@@ -90,7 +91,7 @@ with tab2:
         driverList = st.session_state.get("driverList")
         driverSel = st.session_state.get("driverSel")
         scatterplot = st.session_state.get('scatterplot')
-
+        # st.pyplot((scatterplot['plot']).show(), use_container_width=True)
         try:
             with st.container():
                 coln1, coln2 = st.columns(2)
@@ -170,6 +171,8 @@ with tab2:
             st.write("Waiting...")
 
 with tab1:
+    endTime = time()
+    st.write(f"Time taken to load: {endTime-startTime}")
     try:
         if submitRaceSelect:   
             
