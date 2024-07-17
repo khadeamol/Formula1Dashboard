@@ -171,8 +171,6 @@ with tab2:
             st.write("Waiting...")
 
 with tab1:
-    endTime = time()
-    st.write(f"Time taken to load: {endTime-startTime}")
     try:
         if submitRaceSelect:   
             
@@ -187,6 +185,9 @@ with tab1:
         
         print(f"raceWinner {raceWinner}")
         st.dataframe(resultsDF[['TeamName','ClassifiedPosition', 'BroadcastName']], use_container_width=True, hide_index=True)
+        endTime = time()
+        st.write(f"Time taken to load: {endTime-startTime}")
+
     except Exception as e:
         print(e)
         st.write("Waiting for user input")
