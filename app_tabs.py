@@ -54,12 +54,12 @@ with st.sidebar:
             raceSelect = st.radio(label = "Pick Race", options=raceList)
             if raceSelect:
                 print(f"Race picked {raceSelect}")
-            submitRaceSelect = st.button("Let's Go.")
+            # submitRaceSelect = st.button("Let's Go.")
 
         with st.form("New form 2"):
             # raceSelect = st.selectbox(f"Select Race for {yearSelect}:", raceList)
             # st.session_state['raceSelect'] = raceSelect
-            # submitForm = st.form_submit_button("Let's go!")
+            submitRaceSelect = st.form_submit_button("Let's go!")
         
             if submitRaceSelect:
                 st.session_state['raceSelect'] = raceSelect
