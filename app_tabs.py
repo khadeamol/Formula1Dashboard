@@ -6,7 +6,7 @@ from time import time
 import driver_trace
 import trace_options
 import fastf1SessionLoad
-
+import raceSummary
 import mpld3
 import streamlit.components.v1 as components
 
@@ -30,7 +30,7 @@ def generateRaceList(year):
 lapTimingDetails = ""
 
 tab1, tab2= st.tabs(["Race Summary","Driver Analysis"])
-
+ff.Cache.enable_cache("cache")
 if 'responsePacket' not in st.session_state:
     responsePacket = {}
     responsePacket['maxSpeed'] = ""
@@ -50,7 +50,7 @@ with st.sidebar:
             raceList = generateRaceList(yearSelect)    
             st.session_state['raceList'] = raceList
             # raceSelect = st.radio(label = "Pick Race", options=raceList)
-            
+
             raceSelect = st.selectbox(f"Select Race for {yearSelect}:", raceList)
             
             st.session_state['raceSelect'] = raceSelect
@@ -93,10 +93,9 @@ with tab2:
                 with coln1:
                     driverSel = st.selectbox("Pick Driver", options = driverList)
                     totalLaps = int(max((st.session_state.get('sessionObj')).laps.pick_driver(driverSel)['LapNumber']))
-                    st.write(f"{driverSel} completed {totalLaps} laps at this race.")
 
                 with coln2:
-                    lapSelect = st.text_input("Enter Lap Number")
+                    lapSelect = st.number_input(f"Enter Lap Number. Maximum: {totalLaps}", min_value=1, max_value=totalLaps )
             
             col1, col2, col3= st.columns(3)
             with col1:
@@ -179,9 +178,14 @@ with tab1:
                 st.subheader(raceWinner)
         
         print(f"raceWinner {raceWinner}")
-        st.dataframe(resultsDF[['TeamName','ClassifiedPosition', 'BroadcastName']], use_container_width=True, hide_index=True)
+        if 'resultsDFPrint' not in st.session_state:
+            st.session_state['resultsDFPrint'] = resultsDF[['TeamName','ClassifiedPosition', 'BroadcastName']]
+        else:
+            st.session_state['resultsDFPrint'] = resultsDF[['TeamName','ClassifiedPosition', 'BroadcastName']]
+        st.dataframe(st.session_state.get('resultsDFPrint'), use_container_width=True, hide_index=True)
         endTime = time()
         st.write(f"Time taken to load: {endTime-startTime}")
+        st.pyplot(raceSummary.lapTimeViolinPlot())
 
     except Exception as e:
         print(e)
