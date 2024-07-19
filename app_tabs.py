@@ -21,7 +21,6 @@ schedule = pd.read_parquet("./races_by_year.pq")
 def generateRaceList(year):
     df = schedule
     raceList = pd.DataFrame(df[df['EventYear']==year]['EventName'])
-    # df[df["team"].str.contains("Team 1") == False]
     print("Printing racelist ")
     
     raceList = raceList[raceList['EventName'].str.contains("Pre") == False]
@@ -43,24 +42,20 @@ if 'responsePacket' not in st.session_state:
 with st.sidebar:
     with st.expander("Select Race to begin analysis."):
         startTime = time()
-        with st.form("New form"):
-            yearSelect = st.selectbox("Enter year", options = ['2024', '2023', '2022', '2021', '2020', '2019'])
-            st.form_submit_button("Select Year.")
-            st.session_state['yearSel'] = yearSelect
-
+        yearSelect = st.selectbox("Enter year", options = ['2024', '2023', '2022', '2021', '2020', '2019'])
+        st.button("Select Year.")
+        st.session_state['yearSel'] = yearSelect
         
         if yearSelect:
             raceList = generateRaceList(yearSelect)    
             st.session_state['raceList'] = raceList
-            raceSelect = st.radio(label = "Pick Race", options=raceList)
-            if raceSelect:
-                print(f"Race picked {raceSelect}")
-            # submitRaceSelect = st.button("Let's Go.")
-
-        with st.form("New form 2"):
-            # raceSelect = st.selectbox(f"Select Race for {yearSelect}:", raceList)
-            # st.session_state['raceSelect'] = raceSelect
-            submitRaceSelect = st.form_submit_button("Let's go!")
+            # raceSelect = st.radio(label = "Pick Race", options=raceList)
+            
+            raceSelect = st.selectbox(f"Select Race for {yearSelect}:", raceList)
+            
+            st.session_state['raceSelect'] = raceSelect
+            submitRaceSelect = st.button("Let's Go.")
+            # submitRaceSelect = st.form_submit_button("Let's go!")
         
             if submitRaceSelect:
                 st.session_state['raceSelect'] = raceSelect
