@@ -8,7 +8,6 @@ import streamlit as st
 
 
 fastf1.plotting.setup_mpl(misc_mpl_mods=False)
-ff.Cache.enable_cache("cache")
 
 
 def lapTimeViolinPlot():
