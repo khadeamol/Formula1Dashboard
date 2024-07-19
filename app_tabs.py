@@ -30,7 +30,7 @@ def generateRaceList(year):
 lapTimingDetails = ""
 
 tab1, tab2= st.tabs(["Race Summary","Driver Analysis"])
-ff.Cache.enable_cache("cache")
+
 if 'responsePacket' not in st.session_state:
     responsePacket = {}
     responsePacket['maxSpeed'] = ""
@@ -120,8 +120,6 @@ with tab2:
                 scatterplot = driver_trace.scatterPlot(driverSel=st.session_state.get('driverSel'))
                 print(st.session_state.get('responseObj'))
 
-            
-
                 if fastestLap:
                     sessionObj = st.session_state.get("sessionObj")
                     print(f"{driverSel}'s Fastest Lap.")
@@ -183,9 +181,9 @@ with tab1:
         else:
             st.session_state['resultsDFPrint'] = resultsDF[['TeamName','ClassifiedPosition', 'BroadcastName']]
         st.dataframe(st.session_state.get('resultsDFPrint'), use_container_width=True, hide_index=True)
+        st.pyplot(raceSummary.lapTimeViolinPlot())
         endTime = time()
         st.write(f"Time taken to load: {endTime-startTime}")
-        st.pyplot(raceSummary.lapTimeViolinPlot())
 
     except Exception as e:
         print(e)

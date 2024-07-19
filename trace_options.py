@@ -3,19 +3,15 @@ import matplotlib.pyplot as plt
 import fastf1 as ff
 import fastf1.plotting
 import pandas as pd
-
+import streamlit as st
 
 fastf1.plotting.setup_mpl(misc_mpl_mods=False)
 ff.Cache.enable_cache("cache")
 
-def loadSession(yearSel, raceSel, sessionSel="R"):
-    session = ff.get_session(int(yearSel), raceSel, sessionSel)
-    sessionObj = session.load()
-    return sessionObj
 
 def fastestLapTrace(sessionObj, driver1, driver2, lapSelect = None):
     # Load session
-    
+    sessionObj = st.session_state.get('sessionObj')
     if lapSelect:
         driver1_lap = sessionObj.laps.pick_driver(driver1).pick_lap(lapSelect)
         driver2_lap = sessionObj.laps.pick_driver(driver2).pick_lap(lapSelect)
